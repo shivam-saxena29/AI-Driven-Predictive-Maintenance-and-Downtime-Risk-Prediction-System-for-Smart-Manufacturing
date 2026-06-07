@@ -10,6 +10,10 @@ __pycache__/
 
 # Data files (large datasets)
 data/**/*.csv
+!data/raw/PdM_machines.csv
+!data/raw/PdM_errors.csv
+!data/final/final_model_dataset.csv
+
 data/**/*.xlsx
 data/**/*.parquet
 data/**/*.pkl
@@ -17,5 +21,6 @@ data/**/*.zip
 data/**/*.gz
 
 # Serialized model files (binaries)
-models/*.pkl
-models/**/*.pkl
+# Allow models for deployment
+# models/*.pkl
+# models/**/*.pkl

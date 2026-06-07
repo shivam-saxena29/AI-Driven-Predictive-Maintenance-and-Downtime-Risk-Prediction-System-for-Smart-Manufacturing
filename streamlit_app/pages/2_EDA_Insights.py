@@ -93,7 +93,7 @@ with kpi_col2:
 with kpi_col3:
     kpi_card(
         label="Downtime Events Logged",
-        value="719",
+        value="761",
         delta="Logged Failures",
         status_type="critical",
         icon=""
@@ -101,8 +101,8 @@ with kpi_col3:
 with kpi_col4:
     kpi_card(
         label="Features Available",
-        value="33",
-        delta="Dataset Columns",
+        value="31",
+        delta="Engineered Features",
         status_type="warning",
         icon=""
     )

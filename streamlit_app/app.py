@@ -36,7 +36,7 @@ with kpi_col1:
 with kpi_col2:
     kpi_card(
         label="Failure Events Logged",
-        value="719",
+        value="761",
         delta="Historical Anomalies",
         status_type="critical",
         icon=""
@@ -44,8 +44,8 @@ with kpi_col2:
 with kpi_col3:
     kpi_card(
         label="Model Recall",
-        value="90.28%",
-        delta="Failure Detection Rate",
+        value="96.53%",
+        delta="Peak Failure Detection Rate (Random Forest)",
         status_type="warning",
         icon=""
     )
@@ -403,7 +403,7 @@ with col_summary_left:
         st.markdown(
             """* **Objective**: Predict machine failures before they occur to schedule proactive maintenance.
 * **Business Problem**: Unplanned downtime in smart manufacturing costs factories thousands of dollars per hour.
-* **Expected Benefits**: Up to 90.28% recall in detecting failures, enabling proactive maintenance scheduling and cost reduction.
+* **Expected Benefits**: Up to 96.53% recall in detecting failures (Random Forest), enabling proactive maintenance scheduling and cost reduction.
 * **Explainable AI Integration**: Evaluates why a machine is predicted at risk using SHAP, showing which sensors are contributing to the alert."""
         )
 

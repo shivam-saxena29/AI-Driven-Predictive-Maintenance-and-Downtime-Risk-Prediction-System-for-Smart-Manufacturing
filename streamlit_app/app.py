@@ -246,9 +246,12 @@ with left_panel_col:
                 importance_df["Feature Label"] = importance_df["Feature"].map(lambda x: FRIENDLY_NAMES.get(x, x))
                 top_10 = importance_df.head(10).copy()
                 
-                # Simple chart_data
+                # Simple chart_data — fall back to table if st.bar_chart fails on Cloud
                 chart_data = top_10.set_index("Feature Label")[["Importance"]]
-                st.bar_chart(chart_data, height=250)
+                try:
+                    st.bar_chart(chart_data, height=250)
+                except Exception:
+                    st.dataframe(chart_data.style.highlight_max(axis=0), use_container_width=True)
             else:
                 st.warning("Feature importance CSV not found.")
         except Exception as e:

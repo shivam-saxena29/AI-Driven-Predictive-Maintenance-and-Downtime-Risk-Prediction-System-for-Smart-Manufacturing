@@ -1,0 +1,21 @@
+venv/
+__pycache__/
+.ipynb_checkpoints/
+
+.streamlit/secrets.toml
+
+.env
+
+*.log
+
+# Data files (large datasets)
+data/**/*.csv
+data/**/*.xlsx
+data/**/*.parquet
+data/**/*.pkl
+data/**/*.zip
+data/**/*.gz
+
+# Serialized model files (binaries)
+models/*.pkl
+models/**/*.pkl

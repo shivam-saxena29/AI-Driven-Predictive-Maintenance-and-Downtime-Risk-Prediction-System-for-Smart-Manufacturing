@@ -3,8 +3,16 @@ import sys
 import pandas as pd
 import numpy as np
 import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
+
+# Graceful plotly import — prevents crash on Streamlit Cloud if package install is delayed
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except Exception:
+    px = None
+    go = None
+    PLOTLY_AVAILABLE = False
 
 # Set page config
 st.set_page_config(
@@ -26,6 +34,9 @@ load_css("EDA")
 load_sidebar_branding()
 
 # Sidebar branding and styles loaded
+
+if not PLOTLY_AVAILABLE:
+    st.warning("Plotly is not available in this environment. Interactive charts are hidden. Please reboot the app on Streamlit Cloud if this persists.")
 
 # Page Title & Description wrapped in a custom card
 st.markdown(
@@ -115,20 +126,21 @@ with col_fail:
         failure_counts = df_model['failure_flag'].value_counts()
         failure_counts.index = ['Healthy (0)' if x == 0 else 'Failure (1)' for x in failure_counts.index]
         
-        fig_pie = px.pie(
-            names=failure_counts.index,
-            values=failure_counts.values,
-            color=failure_counts.index,
-            color_discrete_map={'Healthy (0)': '#10B981', 'Failure (1)': '#EF4444'},
-            hole=0.4
-        )
-        fig_pie.update_layout(
-            margin=dict(l=20, r=20, t=20, b=20),
-            height=280,
-            paper_bgcolor="rgba(0,0,0,0)",
-            font={'color': '#1a1a2e'}
-        )
-        st.plotly_chart(fig_pie, use_container_width=True)
+        if PLOTLY_AVAILABLE:
+            fig_pie = px.pie(
+                names=failure_counts.index,
+                values=failure_counts.values,
+                color=failure_counts.index,
+                color_discrete_map={'Healthy (0)': '#10B981', 'Failure (1)': '#EF4444'},
+                hole=0.4
+            )
+            fig_pie.update_layout(
+                margin=dict(l=20, r=20, t=20, b=20),
+                height=280,
+                paper_bgcolor="rgba(0,0,0,0)",
+                font={'color': '#1a1a2e'}
+            )
+            st.plotly_chart(fig_pie, use_container_width=True)
         st.caption("Failures represent only ~0.08% of the dataset, illustrating extreme class imbalance.")
 
 with col_err:
@@ -138,22 +150,23 @@ with col_err:
         error_counts.columns = ['Error Type', 'Occurrences']
         error_counts = error_counts.sort_values('Error Type')
         
-        fig_bar = px.bar(
-            error_counts,
-            x='Error Type',
-            y='Occurrences',
-            color='Error Type',
-            color_discrete_sequence=px.colors.qualitative.Safe
-        )
-        fig_bar.update_layout(
-            margin=dict(l=20, r=20, t=25, b=20),
-            height=280,
-            showlegend=False,
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font={'color': '#1a1a2e'}
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        if PLOTLY_AVAILABLE:
+            fig_bar = px.bar(
+                error_counts,
+                x='Error Type',
+                y='Occurrences',
+                color='Error Type',
+                color_discrete_sequence=px.colors.qualitative.Safe
+            )
+            fig_bar.update_layout(
+                margin=dict(l=20, r=20, t=25, b=20),
+                height=280,
+                showlegend=False,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font={'color': '#1a1a2e'}
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
         st.caption("Distribution of the 5 error codes triggered during machine operations.")
 
 st.write("")
@@ -183,36 +196,38 @@ using a representative sample of 10,000 rows to ensure lag-free performance."""
         with tab:
             col_hist, col_box = st.columns(2)
             with col_hist:
-                fig_hist = px.histogram(
-                    df_sensor_sample,
-                    x=col_name,
-                    nbins=50,
-                    color_discrete_sequence=[color]
-                )
-                fig_hist.update_layout(
-                    title_text=f"{label} Distribution Density ({unit})",
-                    height=280,
-                    margin=dict(l=20, r=20, t=40, b=20),
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    font={'color': '#1a1a2e'}
-                )
-                st.plotly_chart(fig_hist, use_container_width=True)
+                if PLOTLY_AVAILABLE:
+                    fig_hist = px.histogram(
+                        df_sensor_sample,
+                        x=col_name,
+                        nbins=50,
+                        color_discrete_sequence=[color]
+                    )
+                    fig_hist.update_layout(
+                        title_text=f"{label} Distribution Density ({unit})",
+                        height=280,
+                        margin=dict(l=20, r=20, t=40, b=20),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font={'color': '#1a1a2e'}
+                    )
+                    st.plotly_chart(fig_hist, use_container_width=True)
             with col_box:
-                fig_box = px.box(
-                    df_sensor_sample,
-                    y=col_name,
-                    color_discrete_sequence=[color]
-                )
-                fig_box.update_layout(
-                    title_text=f"{label} Range & Outliers ({unit})",
-                    height=280,
-                    margin=dict(l=20, r=20, t=40, b=20),
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    font={'color': '#1a1a2e'}
-                )
-                st.plotly_chart(fig_box, use_container_width=True)
+                if PLOTLY_AVAILABLE:
+                    fig_box = px.box(
+                        df_sensor_sample,
+                        y=col_name,
+                        color_discrete_sequence=[color]
+                    )
+                    fig_box.update_layout(
+                        title_text=f"{label} Range & Outliers ({unit})",
+                        height=280,
+                        margin=dict(l=20, r=20, t=40, b=20),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font={'color': '#1a1a2e'}
+                    )
+                    st.plotly_chart(fig_box, use_container_width=True)
 
 st.write("")
 
@@ -237,26 +252,27 @@ with st.container(border=True):
     }
     corr_labels = [friendly_labels.get(c, c) for c in existing_corr_cols]
     
-    fig_heat = go.Figure(data=go.Heatmap(
-        z=corr_matrix.values,
-        x=corr_labels,
-        y=corr_labels,
-        colorscale='RdBu',
-        zmin=-1.0,
-        zmax=1.0,
-        text=np.round(corr_matrix.values, 2),
-        texttemplate="%{text}",
-        hoverongaps=False
-    ))
-    fig_heat.update_layout(
-        title='Correlation Heatmap (Key Sensor & Derived Features)',
-        height=400,
-        margin=dict(l=40, r=40, t=50, b=40),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font={'color': '#1a1a2e'}
-    )
-    st.plotly_chart(fig_heat, use_container_width=True)
+    if PLOTLY_AVAILABLE:
+        fig_heat = go.Figure(data=go.Heatmap(
+            z=corr_matrix.values,
+            x=corr_labels,
+            y=corr_labels,
+            colorscale='RdBu',
+            zmin=-1.0,
+            zmax=1.0,
+            text=np.round(corr_matrix.values, 2),
+            texttemplate="%{text}",
+            hoverongaps=False
+        ))
+        fig_heat.update_layout(
+            title='Correlation Heatmap (Key Sensor & Derived Features)',
+            height=400,
+            margin=dict(l=40, r=40, t=50, b=40),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font={'color': '#1a1a2e'}
+        )
+        st.plotly_chart(fig_heat, use_container_width=True)
 
 st.write("")
 

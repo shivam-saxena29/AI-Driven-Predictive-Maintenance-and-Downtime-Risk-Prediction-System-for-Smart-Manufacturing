@@ -6,11 +6,11 @@ def load_css(active_page="Home"):
     Hides native streamlit headers and page links, and styles card elements.
     """
     href_targets = {
-        "Home": 'a[href="/"]',
-        "Prediction": 'a[href*="1_Downtime_Risk_Prediction"]',
-        "EDA": 'a[href*="2_EDA_Insights"]',
-        "SHAP": 'a[href*="3_SHAP_Insights"]',
-        "Performance": 'a[href*="4_Model_Performance"]'
+        "Home": 'a[href="/"], a[href*="/~/+/"]',
+        "Prediction": 'a[href*="Downtime_Risk_Prediction"]',
+        "EDA": 'a[href*="EDA_Insights"]',
+        "SHAP": 'a[href*="SHAP_Insights"]',
+        "Performance": 'a[href*="Model_Performance"]'
     }
     target = href_targets.get(active_page, 'a[href="/"]')
     

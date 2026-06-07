@@ -2,7 +2,14 @@ import os
 import sys
 import pandas as pd
 import streamlit as st
-import plotly.express as px
+
+# Graceful plotly import — prevents crash on Streamlit Cloud if package install is delayed
+try:
+    import plotly.express as px
+    PLOTLY_AVAILABLE = True
+except Exception:
+    px = None
+    PLOTLY_AVAILABLE = False
 
 # Resolve paths
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,7 +21,7 @@ from utils.styles import load_css, load_sidebar_branding, kpi_card
 
 # Page Configuration
 st.set_page_config(
-    page_title="SHAP Diagnostics | Smart Manufacturing",
+    page_title="SHAP Insights | Smart Manufacturing",
     page_icon=None,
     layout="wide"
 )
@@ -22,6 +29,9 @@ st.set_page_config(
 # Apply global styles and sidebar branding
 load_css("SHAP")
 load_sidebar_branding()
+
+if not PLOTLY_AVAILABLE:
+    st.warning("Plotly is not available in this environment. Interactive charts are hidden. Please reboot the app on Streamlit Cloud if this persists.")
 
 # Sidebar branding and styles loaded
 
@@ -62,24 +72,25 @@ with st.container(border=True):
                 top_15 = df_imp_sorted.tail(15)
                 
                 # Plotly horizontal bar chart
-                fig_imp = px.bar(
-                    top_15,
-                    x="Importance",
-                    y="Feature Label",
-                    orientation="h",
-                    color="Importance",
-                    color_continuous_scale="viridis",
-                    labels={"Importance": "SHAP Global Importance", "Feature Label": "Feature"},
-                )
-                fig_imp.update_layout(
-                    margin=dict(l=20, r=20, t=10, b=20),
-                    height=450,
-                    coloraxis_showscale=False,
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    font={'color': '#1a1a2e'}
-                )
-                st.plotly_chart(fig_imp, use_container_width=True)
+                if PLOTLY_AVAILABLE:
+                    fig_imp = px.bar(
+                        top_15,
+                        x="Importance",
+                        y="Feature Label",
+                        orientation="h",
+                        color="Importance",
+                        color_continuous_scale="viridis",
+                        labels={"Importance": "SHAP Global Importance", "Feature Label": "Feature"},
+                    )
+                    fig_imp.update_layout(
+                        margin=dict(l=20, r=20, t=10, b=20),
+                        height=450,
+                        coloraxis_showscale=False,
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font={'color': '#1a1a2e'}
+                    )
+                    st.plotly_chart(fig_imp, use_container_width=True)
             else:
                 st.warning(f"Could not locate feature_importance.csv at: {csv_path}")
     except Exception as e:

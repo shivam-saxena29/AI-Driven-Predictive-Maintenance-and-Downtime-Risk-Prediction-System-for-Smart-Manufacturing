@@ -1,6 +1,13 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
+
+# Graceful plotly import — prevents crash on Streamlit Cloud if package install is delayed
+try:
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except Exception:
+    go = None
+    PLOTLY_AVAILABLE = False
 
 # Page Configuration
 st.set_page_config(
@@ -24,6 +31,9 @@ load_css("Performance")
 load_sidebar_branding()
 
 # Sidebar branding and styles loaded
+
+if not PLOTLY_AVAILABLE:
+    st.warning("Plotly is not available in this environment. Interactive charts are hidden. Please reboot the app on Streamlit Cloud if this persists.")
 
 # Page Title & Description wrapped in a custom card
 st.markdown(
@@ -138,29 +148,30 @@ with col_cm:
         y_labels = ['Actual Healthy', 'Actual Failure']
         
         # Plotly Heatmap (Styled for white theme)
-        fig_cm = go.Figure(data=go.Heatmap(
-            z=z_matrix,
-            x=x_labels,
-            y=y_labels,
-            colorscale='Blues',
-            text=[[f"TN (True Healthy): {z_matrix[0][0]:,}", f"FP (False Alarm): {z_matrix[0][1]:,}"],
-                  [f"FN (Missed Failure): {z_matrix[1][0]:,}", f"TP (Detected Failure): {z_matrix[1][1]:,}"]],
-            texttemplate="%{text}",
-            hoverongaps=False,
-            showscale=False
-        ))
-        
-        fig_cm.update_layout(
-            title="Interactive Confusion Matrix (Holdout Test Set)",
-            height=280,
-            margin=dict(l=20, r=20, t=40, b=20),
-            yaxis=dict(autorange="reversed"),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font={'color': '#1a1a2e'}
-        )
-        
-        st.plotly_chart(fig_cm, use_container_width=True)
+        if PLOTLY_AVAILABLE:
+            fig_cm = go.Figure(data=go.Heatmap(
+                z=z_matrix,
+                x=x_labels,
+                y=y_labels,
+                colorscale='Blues',
+                text=[[f"TN (True Healthy): {z_matrix[0][0]:,}", f"FP (False Alarm): {z_matrix[0][1]:,}"],
+                      [f"FN (Missed Failure): {z_matrix[1][0]:,}", f"TP (Detected Failure): {z_matrix[1][1]:,}"]],
+                texttemplate="%{text}",
+                hoverongaps=False,
+                showscale=False
+            ))
+            
+            fig_cm.update_layout(
+                title="Interactive Confusion Matrix (Holdout Test Set)",
+                height=280,
+                margin=dict(l=20, r=20, t=40, b=20),
+                yaxis=dict(autorange="reversed"),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font={'color': '#1a1a2e'}
+            )
+            
+            st.plotly_chart(fig_cm, use_container_width=True)
         st.caption("Holdout evaluation on 175,220 stratified test rows.")
 
 with col_rep:

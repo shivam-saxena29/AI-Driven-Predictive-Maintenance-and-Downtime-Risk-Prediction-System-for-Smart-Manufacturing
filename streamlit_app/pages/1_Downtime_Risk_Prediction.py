@@ -3,7 +3,14 @@ import sys
 import pandas as pd
 import numpy as np
 import streamlit as st
-import plotly.graph_objects as go
+
+# Graceful plotly import — prevents crash on Streamlit Cloud if package install is delayed
+try:
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except Exception:
+    go = None
+    PLOTLY_AVAILABLE = False
 
 # Add the project root to path to resolve imports correctly
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +33,9 @@ load_css("Prediction")
 load_sidebar_branding()
 
 # Sidebar branding and page config already loaded
+
+if not PLOTLY_AVAILABLE:
+    st.warning("Plotly is not available in this environment. Interactive charts are hidden. Please reboot the app on Streamlit Cloud if this persists.")
 
 # Section 1: Title and Description wrapped in a custom card
 st.markdown(
@@ -193,32 +203,33 @@ the system treats the current sensor value as the rolling average and estimates 
 </div>""", unsafe_allow_html=True)
                         
                         # Plotly Gauge Chart with dark labels for white theme
-                        fig = go.Figure(go.Indicator(
-                            mode="gauge+number",
-                            value=prob_percent,
-                            domain={'x': [0, 1], 'y': [0, 1]},
-                            title={'text': "<b>Downtime Probability</b>", 'font': {'size': 18, 'color': '#1a1a2e'}},
-                            gauge={
-                                'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#4b5563"},
-                                'bar': {'color': risk_data['color']},
-                                'bgcolor': "rgba(0,0,0,0.03)",
-                                'borderwidth': 1,
-                                'bordercolor': "#cbd5e1",
-                                'steps': [
-                                    {'range': [0, 30], 'color': 'rgba(16, 185, 129, 0.12)'},
-                                    {'range': [30, 70], 'color': 'rgba(245, 158, 11, 0.12)'},
-                                    {'range': [70, 100], 'color': 'rgba(239, 68, 68, 0.12)'}
-                                ]
-                            }
-                        ))
-                        fig.update_layout(
-                            height=250, 
-                            margin=dict(l=20, r=20, t=40, b=20),
-                            paper_bgcolor="rgba(0,0,0,0)",
-                            plot_bgcolor="rgba(0,0,0,0)",
-                            font={'color': '#1a1a2e'}
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                        if PLOTLY_AVAILABLE:
+                            fig = go.Figure(go.Indicator(
+                                mode="gauge+number",
+                                value=prob_percent,
+                                domain={'x': [0, 1], 'y': [0, 1]},
+                                title={'text': "<b>Downtime Probability</b>", 'font': {'size': 18, 'color': '#1a1a2e'}},
+                                gauge={
+                                    'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#4b5563"},
+                                    'bar': {'color': risk_data['color']},
+                                    'bgcolor': "rgba(0,0,0,0.03)",
+                                    'borderwidth': 1,
+                                    'bordercolor': "#cbd5e1",
+                                    'steps': [
+                                        {'range': [0, 30], 'color': 'rgba(16, 185, 129, 0.12)'},
+                                        {'range': [30, 70], 'color': 'rgba(245, 158, 11, 0.12)'},
+                                        {'range': [70, 100], 'color': 'rgba(239, 68, 68, 0.12)'}
+                                    ]
+                                }
+                            ))
+                            fig.update_layout(
+                                height=250, 
+                                margin=dict(l=20, r=20, t=40, b=20),
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
+                                font={'color': '#1a1a2e'}
+                            )
+                            st.plotly_chart(fig, use_container_width=True)
 
                 with res_col2:
                     with st.container(border=True):

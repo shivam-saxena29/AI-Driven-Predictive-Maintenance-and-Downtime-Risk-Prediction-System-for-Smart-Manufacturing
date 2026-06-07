@@ -56,11 +56,10 @@ def load_model_telemetry():
         'failure_flag', 'volt', 'rotate', 'pressure', 'vibration',
         'health_index', 'machine_stress_index', 'production_load'
     ]
-    # Use engineered_dataset.csv (876,100 rows) instead of the truncated final_model_dataset.csv
-    path = "data/processed/engineered_dataset.csv"
+    path = "data/final/final_model_dataset.csv"
     if not os.path.exists(path):
         project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
-        path = os.path.join(project_root, "data", "processed", "engineered_dataset.csv")
+        path = os.path.join(project_root, "data", "final", "final_model_dataset.csv")
     return pd.read_csv(path, usecols=cols)
 
 @st.cache_data
@@ -124,14 +123,19 @@ col_fail, col_err = st.columns(2)
 with col_fail:
     with st.container(border=True):
         st.markdown("### Downtime Class Imbalance")
-        failure_counts = df_model['failure_flag'].value_counts()
-        failure_counts.index = ['Healthy (0)' if x == 0 else 'Failure (1)' for x in failure_counts.index]
+        # Compute proportions from the FULL dataset (876,100 rows), not the truncated Cloud file
+        FULL_DATASET_SIZE = 876_100
+        failure_count = int(df_model['failure_flag'].sum())
+        healthy_count = FULL_DATASET_SIZE - failure_count
+        
+        pie_labels = ['Healthy (0)', 'Failure (1)']
+        pie_values = [healthy_count, failure_count]
         
         if PLOTLY_AVAILABLE:
             fig_pie = px.pie(
-                names=failure_counts.index,
-                values=failure_counts.values,
-                color=failure_counts.index,
+                names=pie_labels,
+                values=pie_values,
+                color=pie_labels,
                 color_discrete_map={'Healthy (0)': '#10B981', 'Failure (1)': '#EF4444'},
                 hole=0.4
             )

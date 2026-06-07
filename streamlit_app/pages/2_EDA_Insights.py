@@ -56,10 +56,11 @@ def load_model_telemetry():
         'failure_flag', 'volt', 'rotate', 'pressure', 'vibration',
         'health_index', 'machine_stress_index', 'production_load'
     ]
-    path = "data/final/final_model_dataset.csv"
+    # Use engineered_dataset.csv (876,100 rows) instead of the truncated final_model_dataset.csv
+    path = "data/processed/engineered_dataset.csv"
     if not os.path.exists(path):
         project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
-        path = os.path.join(project_root, "data", "final", "final_model_dataset.csv")
+        path = os.path.join(project_root, "data", "processed", "engineered_dataset.csv")
     return pd.read_csv(path, usecols=cols)
 
 @st.cache_data
